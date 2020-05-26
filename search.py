@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import P4J
 import pylab as plt
-from utils import mjd_to_f, calc_chi_sq, get_continuous_frac
+import numpy as np
+import tqdm, logging
+from frb_periodicity.utils import mjd_to_f, calc_chi_sq, get_continuous_frac
 from riptide import ffa_search
 from riptide import TimeSeries
 
@@ -17,18 +19,18 @@ def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, p
     nan_mask = (np.isnan(chi_sqrs)) | (np.isinf(chi_sqrs))
     red_chi_sqrs = chi_sqrs[~nan_mask]/(nbins-1)
     periods = periods[~nan_mask]
-    arg = np.argmax(chi_sqrs)
+    
+    arg = np.argmax(red_chi_sqrs)
     logging.info(f'Max reduced chi square value is {red_chi_sqrs[arg]} at period of {periods[arg]}')
     return red_chi_sqrs, periods
 
 
-def riptide_search(bursts, pmin=2*24*60*60, pmax=2*365*24*60*60, 
+def riptide_search(bursts, pmin=1*24*60*60, pmax=50*24*60*60, 
                    ts_bin_width=0.05, nbins_profile = 40):
     
     ts_arr = np.linspace(np.min(bursts), np.max(bursts), 
                      (np.max(bursts)-np.min(bursts))/ts_bin_width)
-    hist, edges = np.histogram(bursts, bins=ts_arr)
-    
+    hist, edges = np.histogram(bursts, bins=ts_arr)   
     bin_mids = (edges[1:] + edges[:-1])/2
     hist[hist >= 1] = 1
     
@@ -37,8 +39,11 @@ def riptide_search(bursts, pmin=2*24*60*60, pmax=2*365*24*60*60,
     fs = np.linspace(1/pmax, 1/pmin, (pmax-pmin)/max(bin_mids))
     periods = 1/fs
     
-    # Chosing periods for which bin width (period/nbins_profile > tsamp)
-    periods = periods[periods/nbins_profile > ts.tsamp]
+    valid_period_mask = periods/nbins_profile > ts.tsamp
+    if valid_period_mask.sum() < len(periods):
+        logging.warn('Period/nbins should be greater than tsamp. Not all periods in the given range are valid.'
+                     'Selecting the valid periods for search.')
+        periods = periods[valid_period_mask]
     
     continuous_frac = []
     for p in tqdm.tqdm(periods):
@@ -47,7 +52,7 @@ def riptide_search(bursts, pmin=2*24*60*60, pmax=2*365*24*60*60,
 
     arg = np.argmax(continuous_frac)
     logging.info(f'Max continuous fraction without data is {continuous_frac[arg]}'
-                 'at a period of {periods[arg]}')
+                 f'at a period of {periods[arg]}')
 
     return np.array(continuous_frac), periods
 
@@ -92,3 +97,4 @@ def p4j_search(bursts, pmin, pmax, plot= True, save=True):
         if save:
             plt.savefig('P4J_search_output.png', bbox_inches='tight')
 
+    return per, 1/freq
