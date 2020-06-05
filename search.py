@@ -41,7 +41,7 @@ def riptide_search(bursts, pmin=1*24*60*60, pmax=50*24*60*60,
     
     valid_period_mask = periods/nbins_profile > ts.tsamp
     if valid_period_mask.sum() < len(periods):
-        logging.warn('Period/nbins should be greater than tsamp. Not all periods in the given range are valid.'
+        logging.warn('Period/nbins should be greater than tsamp. Not all periods in the given range are valid. '
                      'Selecting the valid periods for search.')
         periods = periods[valid_period_mask]
     
@@ -51,8 +51,8 @@ def riptide_search(bursts, pmin=1*24*60*60, pmax=50*24*60*60,
         continuous_frac.append(get_continuous_frac(folded))
 
     arg = np.argmax(continuous_frac)
-    logging.info(f'Max continuous fraction without data is {continuous_frac[arg]}'
-                 f'at a period of {periods[arg]}')
+    logging.info(f'Max continuous fraction without data is {continuous_frac[arg]} '
+                 f'at a period of {periods[arg]/(24*60*60)} days')
 
     return np.array(continuous_frac), periods
 
@@ -84,7 +84,7 @@ def p4j_search(bursts, pmin, pmax, plot= True, save=True):
         plt.grid()
 
         ax = fig.add_subplot(1, 2, 2)
-        phase = np.mod(mjd, 1.0/fbest[0])*fbest[0]
+        phase = np.mod(mjds, 1.0/fbest[0])*fbest[0]
         idx = np.argsort(phase)
         ax.errorbar(np.concatenate([np.sort(phase), np.sort(phase)+1.0]), 
                     np.concatenate([mag[idx], mag[idx]]),
