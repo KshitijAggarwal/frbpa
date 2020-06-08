@@ -46,8 +46,7 @@ def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, p
     return red_chi_sqrs, periods
 
 
-def riptide_search(bursts, pmin=1*24*60*60, pmax=50*24*60*60,
-                   ts_bin_width=0.05, nbins_profile = 40):
+def riptide_search(bursts, pmin=1, pmax=50, ts_bin_width=0.05, nbins_profile = 40):
     """
 
     Periodicity search by evaluating the fraction of folded profile without any detectable activity, as used in
@@ -60,6 +59,8 @@ def riptide_search(bursts, pmin=1*24*60*60, pmax=50*24*60*60,
     :param nbins_profile: Number of bins in the folded profile
     :return: continuous_frac, periods
     """
+    pmin = pmin*24*60*60
+    pmax = pmax*24*60*60
     ts_arr = np.linspace(np.min(bursts), np.max(bursts), 
                      (np.max(bursts)-np.min(bursts))/ts_bin_width)
     hist, edges = np.histogram(bursts, bins=ts_arr)   
@@ -75,7 +76,7 @@ def riptide_search(bursts, pmin=1*24*60*60, pmax=50*24*60*60,
     if valid_period_mask.sum() < len(periods):
         periods = periods[valid_period_mask]
         logging.warning(f'Period/nbins should be greater than tsamp. Not all periods in the given range are valid. '
-                     'Selecting the valid periods till {np.max(periods)} for search.')
+                    f'Selecting the valid periods till {np.max(periods)} for search.')
     
     continuous_frac = []
     for p in tqdm.tqdm(periods):
