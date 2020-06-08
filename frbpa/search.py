@@ -46,7 +46,8 @@ def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, p
     return red_chi_sqrs, periods
 
 
-def riptide_search(bursts, pmin=1, pmax=50, ts_bin_width=0.05, nbins_profile = 40):
+def riptide_search(bursts, pmin=1, pmax=50,
+                   ts_bin_width=0.05, nbins_profile = 40):
     """
 
     Periodicity search by evaluating the fraction of folded profile without any detectable activity, as used in
@@ -76,7 +77,7 @@ def riptide_search(bursts, pmin=1, pmax=50, ts_bin_width=0.05, nbins_profile = 4
     if valid_period_mask.sum() < len(periods):
         periods = periods[valid_period_mask]
         logging.warning(f'Period/nbins should be greater than tsamp. Not all periods in the given range are valid. '
-                    f'Selecting the valid periods till {np.max(periods)} for search.')
+                    f'Selecting the valid periods from {np.min(periods)/(24*60*60)} days for search.')
     
     continuous_frac = []
     for p in tqdm.tqdm(periods):
@@ -87,7 +88,7 @@ def riptide_search(bursts, pmin=1, pmax=50, ts_bin_width=0.05, nbins_profile = 4
     logging.info(f'Max continuous fraction without data is {continuous_frac[arg]} '
                  f'at a period of {periods[arg]/(24*60*60)} days')
 
-    return np.array(continuous_frac), periods
+    return np.array(continuous_frac), periods/(24*60*60)
 
 
 def p4j_search(bursts, pmin, pmax, snrs=None, plot=True, save=True, method='QMIEU', mjd_err=0.1, pres=None):
