@@ -24,5 +24,9 @@ Requirements
  
 Citation
 ---
-Please cite Aggarwal et al (in prep.) if you use `frbpa`.
+Please cite the following papers if you use `frbpa`
+* Aggarwal et al (in prep.)
+* [PR3](https://ui.adsabs.harvard.edu/abs/2020arXiv200110275T/abstract)
+* [Rajwade et al (2020)](https://ui.adsabs.harvard.edu/abs/2020MNRAS.tmp.1508R/abstract)
+* [P4J](https://ui.adsabs.harvard.edu/abs/2018ApJS..236...12H/abstract)
 
