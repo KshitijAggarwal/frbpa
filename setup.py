@@ -9,5 +9,5 @@ setup(
     author_email='ka0064@mix.wvu.edu',
     license='',
     description='Periodicity Analysis of Repeating FRBs',
-    install_requires=['astropy', 'numpy', 'matplotlib', 'tqdm', 'scipy', 'P4J'],
+    install_requires=['astropy', 'numpy', 'matplotlib', 'tqdm', 'scipy', 'P4J', 'riptide-ffa'],
 )
