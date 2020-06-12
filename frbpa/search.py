@@ -9,7 +9,7 @@ logging_format = '%(asctime)s - %(funcName)s -%(name)s - %(levelname)s - %(messa
 logging.basicConfig(level=logging.INFO, format=logging_format)
 
 
-def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, pres = None):
+def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, pres = None, nopbar=False):
     """
     Periodicity search using Pearson chi square method used in The CHIME/FRB Collaboration et al 2020
 
@@ -20,6 +20,7 @@ def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, p
     :param pmax: Maximum period to search (in units of days)
     :param nbins: Number of bins to use in the folded profile
     :param pres: Period resolution
+    :param nopbar: Disable progress bar
     :return: red_chi_sqrs, periods
     """
 
@@ -33,7 +34,7 @@ def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, p
         pres = (pmax-pmin)/(0.1/(np.max(bursts) - np.min(bursts)))
     periods = np.linspace(pmin, pmax, pres)
     chi_sqrs = []
-    for period in tqdm.tqdm(periods):
+    for period in tqdm.tqdm(periods, disable=nopbar):
         chi_sqrs.append(calc_chi_sq(obs_mjds, obs_durations, bursts, period, nbins=nbins))
     
     chi_sqrs = np.array(chi_sqrs)
@@ -46,8 +47,7 @@ def pr3_search(bursts, obs_mjds, obs_durations, pmin=1.57, pmax=62.8, nbins=8, p
     return red_chi_sqrs, periods
 
 
-def riptide_search(bursts, pmin=1, pmax=50,
-                   ts_bin_width=0.05, nbins_profile = 40):
+def riptide_search(bursts, pmin=1, pmax=50, ts_bin_width=0.05, nbins_profile = 40, nopbar=False):
     """
 
     Periodicity search by evaluating the fraction of folded profile without any detectable activity, as used in
@@ -58,6 +58,7 @@ def riptide_search(bursts, pmin=1, pmax=50,
     :param pmax: Maximum period to search (in units of days)
     :param ts_bin_width: Time resolution for binning the burst MJDs
     :param nbins_profile: Number of bins in the folded profile
+    :param nopbar: Disable progress bar
     :return: continuous_frac, periods
     """
     pmin = pmin*24*60*60
@@ -80,7 +81,7 @@ def riptide_search(bursts, pmin=1, pmax=50,
                     f'Selecting the valid periods from {np.min(periods)/(24*60*60)} days for search.')
     
     continuous_frac = []
-    for p in tqdm.tqdm(periods):
+    for p in tqdm.tqdm(periods, disable=nopbar):
         folded = ts.fold(p, bins=nbins_profile, subints=1)
         continuous_frac.append(get_continuous_frac(folded))
 
