@@ -92,32 +92,33 @@ def riptide_search(bursts, pmin=1, pmax=50, ts_bin_width=0.05, nbins_profile = 4
     return np.array(continuous_frac), periods/(24*60*60)
 
 
-def p4j_search(bursts, pmin, pmax, snrs=None, plot=True, save=True, method='QMIEU', mjd_err=0.1, pres=None):
+def p4j_search(bursts, pmin, pmax, plot=True, save=True, method='QMIEU', mjd_err=0.1, pres=None):
     """
+    Periodicity search using methods implemented in P4J 
 
     :param bursts: List or array of burst MJDs
     :param pmin: Minimum period to search (in units of days)
     :param pmax: Maximum period to search (in units of days)
-    :param snrs: SNRs of the bursts
     :param plot: To plot the results
     :param save: To save the plotted results
     :param method: Method for periodicity search ['QMIEU', 'LKSL', 'PDMI', 'MHAOV', 'QME', 'QMICS']
-    :param mjd_err: Error (in seconds) in burst MJD measurement
+    :param mjd_err: Error (in seconds) in burst MJD measurement (can be an array or a float)
     :param pres: Resolution of search periods array (unit days)
     :return: periodogram, periods
     """
 
     mjds = bursts
-    if snrs:
+    mag = np.ones(len(mjds))
+    
+    if isinstance(mjd_err, (list, np.ndarray)):
         try:
-            assert len(snrs) == len(mjds)
-        except AssertionError as err:
-            logging.exception("Number of burst MJDs should be equal to number of input SNRs")
-            raise err
-        mag = snrs
+            assert len(mjd_err) == len(mjds)
+        except AssertionError as e:
+            logging.exception("Number of burst MJDs should be equal to number of MJD errors.")
+            raise e
+        err = mjd_err
     else:
-        mag = np.ones(len(mjds))
-    err = np.ones(len(mjds))*(mjd_err/(24*60*60))
+        err = np.ones(len(mjds))*(mjd_err/(24*60*60))
     
     my_per = P4J.periodogram(method=method)
 
@@ -141,7 +142,7 @@ def p4j_search(bursts, pmin, pmax, snrs=None, plot=True, save=True, method='QMIE
         ax.plot([fbest[0], fbest[0]], [ymin, ymax], linewidth=8, alpha=0.2)
         ax.set_ylim([ymin, ymax])
         ax.set_xlabel('Frequency [1/MJD]')
-        ax.set_ylabel('QMI Periodogram')
+        ax.set_ylabel(f'{method} Periodogram')
         plt.title('Periodogram')
         plt.grid()
 
@@ -158,5 +159,6 @@ def p4j_search(bursts, pmin, pmax, snrs=None, plot=True, save=True, method='QMIE
         plt.tight_layout()
         if save:
             plt.savefig('P4J_search_output.png', bbox_inches='tight')
+        plt.show()
 
     return per, 1/freq
