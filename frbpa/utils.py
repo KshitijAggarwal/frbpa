@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import P4J
-import tqdm, logging
+import tqdm, logging, itertools
 logging_format = '%(asctime)s - %(funcName)s -%(name)s - %(levelname)s - %(message)s'
 logging.basicConfig(level=logging.INFO, format=logging_format)
 
@@ -60,20 +60,24 @@ def calc_chi_sq(obs_mjds, obs_durations, bursts, period, nbins=8):
 
 def get_continuous_frac(folded):
     """
+    Calculates the longest circular sequence of zeros 
+    in the folded profile, assuming the array wraps around from 
+    right to left. Returns as a fraction of the total length. 
 
     :param folded: Folded profile from riptide.TimeSeries.fold
     :return: Maximum fraction of folded profile without a detectable burst activity
     """
-    count = 0
-    maxcount = 0
-    for i in folded == 0:
-        if i:
-            count = count + 1
-        else:
-            count = 0
-        if maxcount < count:
-            maxcount = count
-    return maxcount / len(folded)
+    arr = np.tile(folded, 2)
+    group_lengths = [len(tuple(group)) for key, group in itertools.groupby(arr) if key == 0]
+    
+    if len(group_lengths):
+        result = max(group_lengths)
+    else:
+        result = 0
+    
+    # if arr is all zeros 
+    maxlength = min(result, len(folded))
+    return maxlength / len(folded)
 
 
 def figsize(scale, width_by_height_ratio):
