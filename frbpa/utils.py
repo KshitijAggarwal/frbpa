@@ -131,4 +131,4 @@ def get_params(scale=0.5, width_by_height_ratio=1):
               'text.latex.preamble': [r'\usepackage{amsmath}', r'\usepackage{amsbsy}',
                                       r'\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}'],
               'figure.figsize': figsize(scale, width_by_height_ratio)}
-    return paramss
+    return params
