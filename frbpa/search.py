@@ -64,14 +64,14 @@ def riptide_search(bursts, pmin=1, pmax=50, ts_bin_width=0.05, nbins_profile = 4
     pmin = pmin*24*60*60
     pmax = pmax*24*60*60
     ts_arr = np.linspace(np.min(bursts), np.max(bursts), 
-                     (np.max(bursts)-np.min(bursts))/ts_bin_width)
+                     int((np.max(bursts)-np.min(bursts))/ts_bin_width))
     hist, edges = np.histogram(bursts, bins=ts_arr)   
     bin_mids = (edges[1:] + edges[:-1])/2
     hist[hist >= 1] = 1
     
     tsamp = ts_bin_width*24*60*60
     ts = TimeSeries(hist*bin_mids, tsamp)
-    fs = np.linspace(1/pmax, 1/pmin, (pmax-pmin)/max(bin_mids))
+    fs = np.linspace(1/pmax, 1/pmin, int((pmax-pmin)/max(bin_mids)))
     periods = 1/fs
     
     valid_period_mask = periods/nbins_profile > ts.tsamp
